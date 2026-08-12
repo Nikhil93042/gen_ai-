@@ -1,0 +1,21 @@
+{
+  "name": "phaham-summer26-pep",
+  "version": "1.0.0",
+  "description": "DSA, Backend, and GenAI Coursework & Assignments",
+  "main": "server.js",
+  "scripts": {
+    "start": "node Gen-AI/GenAI_Project/server.js",
+    "start:rag": "node Gen-AI/GenAI_Project/server.js",
+    "test:rag": "node Gen-AI/GenAI_Project/test_security.js",
+    "start:backend": "node Backend/StudyStack/server.js",
+    "start:simple": "node server.js"
+  },
+  "keywords": [
+    "rag",
+    "genai",
+    "backend",
+    "dsa"
+  ],
+  "author": "phaham",
+  "license": "ISC"
+}
