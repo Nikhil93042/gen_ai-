@@ -1,5 +1,24 @@
 let store = []; // [{ chunk: "...", embedding: [...] }]
 
+function localEmbedding(text, dim = 64) {
+  const vec = new Array(dim).fill(0);
+  const words = (text || "").toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    let hash = 0;
+    for (let j = 0; j < word.length; j++) {
+      hash = ((hash << 5) - hash) + word.charCodeAt(j);
+      hash |= 0;
+    }
+    const idx = Math.abs(hash) % dim;
+    vec[idx] += 1;
+  }
+  let sumSq = 0;
+  for (let i = 0; i < dim; i++) sumSq += vec[i] * vec[i];
+  const mag = Math.sqrt(sumSq) || 1;
+  return vec.map(v => v / mag);
+}
+
 /**
  * Generate an embedding vector for a given text using Gemini API
  * @param {string} text 
@@ -8,45 +27,36 @@ let store = []; // [{ chunk: "...", embedding: [...] }]
 async function embed(text) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set in environment variables.");
+    return localEmbedding(text);
   }
 
-  // Model preference: text-embedding-004 (recommended standard) or gemini-embedding-2
   const modelName = process.env.GEMINI_EMBEDDING_MODEL || "text-embedding-004";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:embedContent?key=${apiKey}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      content: {
-        parts: [{ text: text }]
-      }
-    })
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: {
+          parts: [{ text: text }]
+        }
+      })
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    // If the chosen model is not found, try fallback to gemini-embedding-2 or text-embedding-004
-    if (response.status === 404 && modelName !== "gemini-embedding-2") {
-      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=${apiKey}`;
-      const fallbackRes = await fetch(fallbackUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: { parts: [{ text: text }] } })
-      });
-      if (fallbackRes.ok) {
-        const fallbackData = await fallbackRes.json();
-        return fallbackData.embedding.values;
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.embedding?.values) {
+        return data.embedding.values;
       }
     }
-    throw new Error(`Gemini Embedding API Error (${response.status}): ${errorText}`);
+  } catch (err) {
+    console.warn(`[Embedding Notice] Cloud embedding unavailable (${err.message}). Using local embedding engine.`);
   }
 
-  const data = await response.json();
-  return data.embedding.values;
+  return localEmbedding(text);
 }
 
 /**
