@@ -1,21 +1,33 @@
 {
-  "name": "phaham-summer26-pep",
+  "name": "genai-rag-suite",
   "version": "1.0.0",
-  "description": "DSA, Backend, and GenAI Coursework & Assignments",
-  "main": "server.js",
+  "description": "Secure GenAI RAG Chatbot & CourseHub Platform with 3-Layer Prompt Injection Defense",
+  "main": "Gen-AI/GenAI_Project/server.js",
   "scripts": {
     "start": "node Gen-AI/GenAI_Project/server.js",
-    "start:rag": "node Gen-AI/GenAI_Project/server.js",
-    "test:rag": "node Gen-AI/GenAI_Project/test_security.js",
-    "start:backend": "node Backend/StudyStack/server.js",
-    "start:simple": "node server.js"
+    "dev": "node Gen-AI/GenAI_Project/server.js",
+    "test": "node Gen-AI/GenAI_Project/test_security.js",
+    "build": "node Gen-AI/GenAI_Project/create_pdf.js"
   },
   "keywords": [
     "rag",
     "genai",
-    "backend",
-    "dsa"
+    "llm",
+    "security",
+    "prompt-injection-defense",
+    "express",
+    "nodejs"
   ],
-  "author": "phaham",
-  "license": "ISC"
+  "author": "Nikhil",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
